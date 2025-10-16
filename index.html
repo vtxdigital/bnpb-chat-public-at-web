@@ -1,108 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BNPB Chat Widget - Iframe Isolated</title>
-    <style>
-        /* Reset and base styles for iframe isolation */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="BNPB Chat Widget Development" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BNPB Chat Widget Development</title>
+    <script type="module" crossorigin src="/assets/index-wQKdcDl_.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/style-u580uagF.css">
+  </head>
 
-        html, body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: transparent !important;
-            background-color: transparent !important;
-            overflow: hidden;
-            height: 100%;
-            width: 100%;
-        }
-
-        /* Ensure chat widget container takes full iframe space */
-        #chat-widget {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: transparent !important;
-            background-color: transparent !important;
-            pointer-events: none;
-        }
-
-        /* Loading state */
-        .loading-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            background: transparent;
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* Error state */
-        .error-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            background: #f8f9fa;
-            color: #dc3545;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .error-message {
-            font-size: 14px;
-            margin-top: 8px;
-            color: #6c757d;
-        }
-    </style>
-</head>
-<body>
-    <!-- Chat Widget Container -->
-    <div id="chat-widget">
-        <div class="loading-container">
-            Loading chat widget...
-        </div>
-    </div>
-
-    <!-- Load the built chat widget script -->
-    <script>
-        // Set iframe mode flag
-        window.__WIDGET_IFRAME_MODE__ = true;
-
-        // Load the built chat widget
-        (function() {
-            const script = document.createElement('script');
-            script.src = './chat-widget.js';
-            script.async = true;
-
-            script.onload = function() {
-                console.log('Chat widget script loaded successfully');
-            };
-
-            script.onerror = function() {
-                console.error('Failed to load chat widget script');
-                document.getElementById('chat-widget').innerHTML = `
-                    <div class="error-container">
-                        <div class="error-icon">⚠️</div>
-                        <div>Failed to load chat widget</div>
-                        <div class="error-message">Please check your internet connection</div>
-                    </div>
-                `;
-            };
-
-            document.head.appendChild(script);
-        })();
-    </script>
-</body>
+  <body style="margin: 0; padding: 0; background: transparent;">
+    <!-- Development interface will be mounted here by main.ts -->
+    <div id="app"></div>
+  </body>
 </html>

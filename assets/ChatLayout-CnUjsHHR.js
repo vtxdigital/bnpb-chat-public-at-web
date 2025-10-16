@@ -1,0 +1,1 @@
+import{d as o,o as t,n,r as a,_ as s,c as r,a as c,b as p}from"./index-wQKdcDl_.js";const i=o({name:"ChatLayout",setup(){t(()=>{n(()=>{a()})})}});function _(u,m,d,f,l,C){const e=p("router-view");return c(),r(e)}const $=s(i,[["render",_]]);export{$ as default};
