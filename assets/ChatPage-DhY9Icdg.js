@@ -1,0 +1,1 @@
+import{d as t,F as a,_ as o,e as n,a as s,f as c,b as r}from"./index-WIfXYKPS.js";const _=t({name:"ChatPage",components:{FloatingChat:a}}),p={class:"chat-container"};function d(i,l,m,f,h,C){const e=r("FloatingChat");return s(),n("div",p,[c(e)])}const u=o(_,[["render",d],["__scopeId","data-v-25d61e47"]]);export{u as default};
