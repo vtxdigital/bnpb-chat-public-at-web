@@ -167,16 +167,33 @@
             opacity: 0.8;
         }
 
-        /* Chat Widget Container - Only cover bottom-right corner */
+        /* Chat Widget Container - Responsive sizing */
         #bnpb-chat-widget-container {
             position: fixed;
             bottom: 0;
             right: 0;
-            width: 450px;
-            height: 700px;
             z-index: 999999;
             background: transparent;
             pointer-events: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Collapsed state - only show chat button */
+        #bnpb-chat-widget-container.collapsed {
+            width: 80px;
+            height: 80px;
+        }
+
+        /* Conversation list state - medium size */
+        #bnpb-chat-widget-container.conversation-list {
+            width: 380px;
+            height: 550px;
+        }
+
+        /* Message drawer state - full size */
+        #bnpb-chat-widget-container.message-drawer {
+            width: 450px;
+            height: 700px;
         }
 
         #bnpb-chat-widget-iframe {
@@ -186,6 +203,39 @@
             display: block;
             background: transparent;
             pointer-events: auto;
+            border-radius: 16px;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            #bnpb-chat-widget-container.collapsed {
+                width: 70px;
+                height: 70px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            #bnpb-chat-widget-container.conversation-list {
+                width: calc(100vw - 20px);
+                height: 500px;
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+            }
+
+            #bnpb-chat-widget-container.message-drawer {
+                width: calc(100vw - 20px);
+                height: calc(100vh - 100px);
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #bnpb-chat-widget-container.message-drawer {
+                height: calc(100vh - 60px);
+            }
         }
 
         /* Responsive */
@@ -315,117 +365,113 @@
     </div>
 
     <!-- Widget Communication Script -->
-    <!-- <script>
-        // Komunikasi dengan chat widget iframe
+    <script>
+        // Chat widget responsive sizing functionality
+        const chatContainer = document.getElementById('bnpb-chat-widget-container');
         const chatIframe = document.getElementById('bnpb-chat-widget-iframe');
 
-        // Listen untuk pesan dari widget
-        window.addEventListener('message', (event) => {
-            // Verifikasi origin (di production, gunakan domain spesifik)
-            if (event.origin !== 'https://92508397f8d5.ngrok-free.app') {
-                return;
-            }
-
-            console.log('📨 Received message from chat widget:', event.data);
-
-            // Handle berbagai tipe pesan dari widget
-            const {
-                type,
-                data
-            } = event.data || {};
-
-            switch (type) {
-                case 'WIDGET_READY':
-                    console.log('✅ Chat widget ready!');
-                    // Kirim konfigurasi awal
-                    sendMessageToWidget('INITIALIZE', {
-                        language: 'id',
-                        theme: 'auto',
-                        backgroundColor: 'transparent',
-                        enableBackground: false
-                    });
-                    // Inject CSS untuk memastikan background transparan
-                    try {
-                        const iframeDoc = chatIframe.contentDocument || chatIframe.contentWindow.document;
-                        if (iframeDoc) {
-                            const style = iframeDoc.createElement('style');
-                            style.textContent = `
-                                body, html, #app, #chat-widget {
-                                    background: transparent !important;
-                                    background-color: transparent !important;
-                                }
-                            `;
-                            iframeDoc.head.appendChild(style);
-                        }
-                    } catch (e) {
-                        console.warn('Cannot inject styles to iframe (likely cross-origin):', e);
-                    }
-                    break;
-
-                case 'LANGUAGE_RESPONSE':
-                    console.log('🌐 Current language:', data.language);
-                    break;
-
-                case 'WIDGET_OPENED':
-                    console.log('📖 Widget drawer opened');
-                    break;
-
-                case 'WIDGET_CLOSED':
-                    console.log('📕 Widget drawer closed');
-                    break;
-
-                case 'NEW_MESSAGE':
-                    console.log('💬 New message received:', data);
-                    break;
-
-                default:
-                    console.log('Unknown message type:', type);
-            }
-        });
-
-        // Fungsi untuk kirim pesan ke widget
-        function sendMessageToWidget(type, data) {
-            if (chatIframe && chatIframe.contentWindow) {
-                chatIframe.contentWindow.postMessage({
-                    type,
-                    data,
-                    source: 'external-website'
-                }, 'https://92508397f8d5.ngrok-free.app');
-            }
-        }
-
-        // API publik untuk kontrol widget dari website eksternal
-        window.BNPBChatWidget = {
-            // Ganti bahasa widget
-            changeLanguage: function(locale) {
-                sendMessageToWidget('SET_LANGUAGE', locale);
-            },
-
-            // Dapatkan bahasa saat ini
-            getCurrentLanguage: function() {
-                sendMessageToWidget('GET_LANGUAGE');
-            },
-
-            // Update atribut widget
-            updateAttributes: function(attributes) {
-                sendMessageToWidget('UPDATE_ATTRIBUTES', attributes);
-            }
+        // Track current state
+        let currentState = {
+            isOpen: false,
+            hasConversation: false
         };
 
-        // Log saat iframe selesai load
-        chatIframe.addEventListener('load', () => {
-            console.log('🖼️ Chat widget iframe loaded successfully');
+        // Function to update container size based on state
+        function updateContainerSize() {
+            // Remove all state classes
+            chatContainer.classList.remove('collapsed', 'conversation-list', 'message-drawer');
+
+            if (!currentState.isOpen) {
+                // Collapsed state - only show chat button
+                chatContainer.classList.add('collapsed');
+            } else if (currentState.hasConversation) {
+                // Message drawer state - full size
+                chatContainer.classList.add('message-drawer');
+            } else {
+                // Conversation list state - medium size
+                chatContainer.classList.add('conversation-list');
+            }
+
+            console.log('📏 Container size updated:', {
+                state: currentState,
+                className: chatContainer.className,
+                dimensions: {
+                    width: chatContainer.offsetWidth,
+                    height: chatContainer.offsetHeight
+                }
+            });
+        }
+
+        // Listen for messages from chat widget iframe
+        window.addEventListener('message', (event) => {
+            // In production, verify origin for security
+            // if (event.origin !== 'https://your-widget-domain.com') {
+            //     return;
+            // }
+
+            const { type, source, data } = event.data || {};
+
+            if (type === 'CHAT_WIDGET_STATE_CHANGE' && source === 'chat-widget-iframe') {
+                console.log('📨 Received chat widget state change:', data);
+
+                // Update current state
+                currentState = {
+                    isOpen: data.isOpen,
+                    hasConversation: data.hasConversation
+                };
+
+                // Update container size
+                updateContainerSize();
+
+                // Optional: Handle additional state changes
+                if (data.isOpen && !data.hasConversation) {
+                    console.log('📖 Chat widget opened - showing conversation list');
+                } else if (data.isOpen && data.hasConversation) {
+                    console.log('💬 Chat widget opened - showing message drawer');
+                } else {
+                    console.log('❌ Chat widget closed');
+                }
+            }
         });
 
-        // Handle error saat load iframe
+        // Initialize with collapsed state
+        currentState = { isOpen: false, hasConversation: false };
+        updateContainerSize();
+
+        // Log when iframe loads
+        chatIframe.addEventListener('load', () => {
+            console.log('🖼️ Chat widget iframe loaded successfully');
+            console.log('📍 Widget URL:', chatIframe.src);
+        });
+
+        // Handle iframe load errors
         chatIframe.addEventListener('error', (error) => {
             console.error('❌ Error loading chat widget:', error);
         });
 
-        console.log('🚀 External website initialized');
-        console.log('📍 Chat widget URL:', chatIframe.src);
-        console.log('💡 Try: window.BNPBChatWidget.changeLanguage("en")');
-    </script> -->
+        // Public API for external website control
+        window.BNPBChatWidget = {
+            // Get current widget state
+            getState: function() {
+                return { ...currentState };
+            },
+
+            // Manually set widget state (for testing)
+            setState: function(state) {
+                currentState = { ...currentState, ...state };
+                updateContainerSize();
+            },
+
+            // Reset to collapsed state
+            collapse: function() {
+                currentState = { isOpen: false, hasConversation: false };
+                updateContainerSize();
+            }
+        };
+
+        console.log('🚀 Responsive chat widget initialized');
+        console.log('� Available API: window.BNPBChatWidget.getState()');
+    </script>
 </body>
 
 </html>
